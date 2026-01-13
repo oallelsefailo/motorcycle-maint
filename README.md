@@ -1,4 +1,4 @@
-# 2024 ZX-10R (KRT) Maintenance / Mods Tracker
+# 2024 ZX10R (KRT) Maintenance / Mods Tracker
 
 Local web app to track maintenance + mods + expenses for my 2024 ZX10R KRT edition.
 
