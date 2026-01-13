@@ -1,0 +1,312 @@
+:root {
+  --bg: #0f1216;
+  --panel: #141922;
+  --panel-2: #10151d;
+  --text: #e9eef6;
+  --muted: #a6b0bf;
+  --border: rgba(255, 255, 255, 0.08);
+
+  /* KRT-ish accents */
+  --krt-green: #43ff6b;
+  --krt-red: #ff365a;
+  --krt-black: #0b0e12;
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji";
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(67, 255, 107, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(255, 54, 90, 0.10), transparent 55%),
+    var(--bg);
+  color: var(--text);
+}
+
+.app {
+  max-width: 1050px;
+  margin: 28px auto;
+  padding: 0 18px 28px;
+}
+
+.header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, rgba(20,25,34,0.95), rgba(16,21,29,0.92));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.title-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.kawi-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.35));
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.2px;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.header-actions { display: flex; gap: 10px; }
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.card {
+  padding: 14px 16px;
+  background: rgba(20, 25, 34, 0.7);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.card-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.table-wrap {
+  margin-top: 14px;
+  padding: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(16, 21, 29, 0.78);
+  box-shadow: var(--shadow);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead th {
+  text-align: left;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 12px 14px;
+  background: rgba(20, 25, 34, 0.9);
+  border-bottom: 1px solid var(--border);
+}
+
+.table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  transition: background 120ms ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.col-date { width: 140px; }
+.col-cost { width: 120px; text-align: right; }
+.table tbody td.col-cost { text-align: right; }
+.col-actions { width: 120px; }
+.col-mileage { width: 140px; text-align: right; }
+.table tbody td.col-mileage { text-align: right; }
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.search {
+  width: 280px;
+  background: rgba(16, 21, 29, 0.7);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.search:focus {
+  border-color: rgba(67, 255, 107, 0.45);
+  box-shadow: 0 0 0 3px rgba(67, 255, 107, 0.12);
+}
+
+tr:hover .actions { opacity: 1; }
+
+.icon-btn {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.icon-btn:hover {
+  border-color: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.04);
+}
+
+.icon-btn.danger:hover {
+  border-color: rgba(255, 54, 90, 0.35);
+  background: rgba(255, 54, 90, 0.08);
+}
+
+.btn {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  cursor: pointer;
+  color: var(--text);
+  background: rgba(255,255,255,0.03);
+}
+
+.btn:not(.btn-primary):hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.16);
+}
+
+.btn-primary {
+  border: none;
+  background: linear-gradient(90deg, rgba(67,255,107,0.95), rgba(255,54,90,0.90));
+  color: #0b0e12;
+  font-weight: 800;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.06);
+}
+
+.btn-ghost {
+  background: transparent;
+}
+
+.footer {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  background: rgba(20, 25, 34, 0.90);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+
+  position: sticky;
+  bottom: 12px;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.add-form {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field.grow { flex: 1; }
+
+label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+input {
+  background: rgba(16, 21, 29, 0.7);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+input:focus {
+  border-color: rgba(67, 255, 107, 0.45);
+  box-shadow: 0 0 0 3px rgba(67, 255, 107, 0.12);
+}
+
+.hint {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.kbd {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  padding: 2px 7px;
+  border-radius: 8px;
+  color: var(--text);
+}
+
+.empty-state {
+  padding: 16px 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.hidden { display: none; }
+
+.editing {
+  background: rgba(67, 255, 107, 0.05) !important;
+  outline: 1px solid rgba(67, 255, 107, 0.18);
+}
+
+@media (max-width: 820px) {
+  .add-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .col-actions { width: 1%; }
+  .actions { opacity: 1; }
+
+  .summary { grid-template-columns: 1fr; }
+  .search { width: 100%; }
+  .header { flex-direction: column; align-items: stretch; }
+  .header-actions { justify-content: space-between; }
+}

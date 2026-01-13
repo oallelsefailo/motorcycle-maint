@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZX10R Maintenance Tracker</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <header class="header">
+        <div class="title-block">
+          <img
+            src="./kawi-logo.png"
+            alt="Kawasaki"
+            class="kawi-logo"
+          />
+          <div>
+            <h1>2024 ZX10R (KRT) Tracker</h1>
+            <p class="subtitle">Maintenance + Mods + Expenses</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <input
+            id="searchInput"
+            class="search"
+            type="text"
+            placeholder="Search… (e.g. oil, chain, levers)"
+          />
+
+          <button id="downloadPdfBtn" class="btn btn-ghost" type="button">
+            Download PDF
+          </button>
+        </div>
+      </header>
+
+      <section class="summary">
+        <div class="card">
+          <div class="card-label">Total spent</div>
+          <div id="totalSpent" class="card-value">$0.00</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Entries</div>
+          <div id="entryCount" class="card-value">0</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Avg oil change interval</div>
+          <div id="oilAvg" class="card-value">—</div>
+        </div>
+      </section>
+
+      <section class="table-wrap">
+        <table class="table" aria-label="Maintenance table">
+          <thead>
+            <tr>
+              <th class="col-date">Date</th>
+              <th>Maintenance / Mod</th>
+              <th class="col-mileage">Mileage</th>
+              <th class="col-cost">Cost</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <!-- rows injected -->
+          </tbody>
+        </table>
+
+        <div id="emptyState" class="empty-state hidden">
+          No entries yet. Add your first oil change / mod below.
+        </div>
+      </section>
+
+      <footer class="footer">
+        <form id="addForm" class="add-form" autocomplete="off">
+          <div class="field">
+            <label for="dateInput">Date</label>
+            <input id="dateInput" type="date" required />
+          </div>
+
+          <div class="field grow">
+            <label for="maintInput">Maintenance / Mod</label>
+            <input
+              id="maintInput"
+              type="text"
+              placeholder="Oil change, tires, slip-on, levers…"
+              required
+              autofocus
+            />
+          </div>
+
+          <div class="field">
+            <label for="mileageInput">Mileage (optional)</label>
+            <input
+              id="mileageInput"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="e.g. 4000"
+            />
+          </div>
+
+          <div class="field">
+            <label for="costInput">Cost</label>
+            <input
+              id="costInput"
+              type="text"
+              inputmode="decimal"
+              placeholder="0.00"
+              required
+            />
+          </div>
+
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+
+        <div class="hint">
+          Tip: hit <span class="kbd">Enter</span> to add. Hover a row to edit or delete.
+        </div>
+      </footer>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
