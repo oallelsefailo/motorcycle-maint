@@ -114,9 +114,13 @@ app.post("/api/entries", (req, res) => {
     id: makeId(),
     date,
     maintenance: maintenance.trim(),
-    mileage: mileageVal,
     cost: costVal,
   };
+
+  // Only add mileage if it has a value
+  if (mileageVal !== null) {
+    newEntry.mileage = mileageVal;
+  }
 
   entries.push(newEntry);
   writeEntries(entries);
@@ -157,13 +161,21 @@ app.put("/api/entries/:id", (req, res) => {
   const idx = entries.findIndex((e) => e.id === id);
   if (idx === -1) return res.status(404).json({ error: "Entry not found." });
 
-  entries[idx] = {
+  const updatedEntry = {
     ...entries[idx],
     date,
     maintenance: maintenance.trim(),
-    mileage: mileageVal,
     cost: costVal,
   };
+
+  // Only add mileage if it has a value, otherwise remove it
+  if (mileageVal !== null) {
+    updatedEntry.mileage = mileageVal;
+  } else {
+    delete updatedEntry.mileage;
+  }
+
+  entries[idx] = updatedEntry;
 
   writeEntries(entries);
   res.json(sortChronological(entries));
@@ -189,7 +201,7 @@ app.get("/api/entries.pdf", (req, res) => {
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
-    'attachment; filename="zx10r-maintenance.pdf"'
+    'attachment; filename="zx10r-maintenance.pdf"',
   );
 
   const doc = new PDFDocument({ margin: 40, size: "LETTER" });
@@ -227,7 +239,7 @@ app.get("/api/entries.pdf", (req, res) => {
       {
         width: doc.page.width - doc.page.margins.right - titleStartX,
         align: "left",
-      }
+      },
     );
 
   // Subtitle / generated time
@@ -269,7 +281,7 @@ app.get("/api/entries.pdf", (req, res) => {
           mileage: "Mileage",
           cost: "Cost",
         },
-        true
+        true,
       );
     }
 
@@ -288,7 +300,7 @@ app.get("/api/entries.pdf", (req, res) => {
       y + rowPadY,
       {
         width: colDate - 12,
-      }
+      },
     );
 
     // Maintenance
@@ -301,8 +313,8 @@ app.get("/api/entries.pdf", (req, res) => {
     const mileText = isHeader
       ? String(mileage)
       : Number.isFinite(Number(mileage))
-      ? String(Math.round(Number(mileage)))
-      : "";
+        ? String(Math.round(Number(mileage)))
+        : "";
     doc.text(mileText, startX + colDate + colMaint + 6, y + rowPadY, {
       width: colMileage - 12,
       align: "right",
@@ -335,7 +347,7 @@ app.get("/api/entries.pdf", (req, res) => {
       mileage: "Mileage",
       cost: "Cost",
     },
-    true
+    true,
   );
 
   // Data rows + total

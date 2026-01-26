@@ -27,7 +27,7 @@
   },
   {
     "id": "mkcyxmw7jgi89l",
-    "date": "2025-03-20",
+    "date": "2025-09-20",
     "maintenance": "oil change",
     "mileage": 5000,
     "cost": 63.5
@@ -36,21 +36,24 @@
     "id": "mkcyzww88vcq0z",
     "date": "2024-05-13",
     "maintenance": "new rage LED turn signal",
-    "mileage": null,
     "cost": 117
   },
   {
     "id": "mkcz0uszw35z03",
     "date": "2025-04-17",
     "maintenance": "slider spools",
-    "mileage": null,
     "cost": 44.09
   },
   {
     "id": "mkcz41lqsd64hk",
     "date": "2025-07-07",
-    "maintenance": "KNV install rear sets",
-    "mileage": null,
+    "maintenance": "KNV - install rear sets",
     "cost": 235.15
+  },
+  {
+    "id": "mkvpl2xg66x046",
+    "date": "2026-01-26",
+    "maintenance": "KNV - rear hugger removal",
+    "cost": 140
   }
 ]
