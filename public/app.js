@@ -16,6 +16,8 @@ const downloadPdfBtn = document.getElementById("downloadPdfBtn");
 let entries = [];
 let query = "";
 let deleteConfirmId = null;
+let sortColumn = "date"; // default sort by date
+let sortDirection = "asc"; // asc or desc
 
 function escapeHtml(str) {
   return String(str)
@@ -70,7 +72,7 @@ function computeAverageOilInterval(list) {
   const oil = list
     .filter(
       (e) =>
-        matchesOilChange(e.maintenance) && Number.isFinite(Number(e.mileage))
+        matchesOilChange(e.maintenance) && Number.isFinite(Number(e.mileage)),
     )
     .map((e) => ({ mileage: Number(e.mileage) }))
     .sort((a, b) => a.mileage - b.mileage);
@@ -98,6 +100,39 @@ function computeTotals() {
   oilAvgEl.textContent = avgOil ? `~${avgOil.toLocaleString()} miles` : "—";
 }
 
+function sortEntries(list) {
+  return list.slice().sort((a, b) => {
+    let aVal, bVal;
+
+    switch (sortColumn) {
+      case "date":
+        aVal = a.date || "";
+        bVal = b.date || "";
+        break;
+      case "maintenance":
+        aVal = (a.maintenance || "").toLowerCase();
+        bVal = (b.maintenance || "").toLowerCase();
+        break;
+      case "mileage":
+        aVal = Number(a.mileage) || 0;
+        bVal = Number(b.mileage) || 0;
+        break;
+      case "cost":
+        aVal = Number(a.cost) || 0;
+        bVal = Number(b.cost) || 0;
+        break;
+      default:
+        return 0;
+    }
+
+    let comparison = 0;
+    if (aVal < bVal) comparison = -1;
+    if (aVal > bVal) comparison = 1;
+
+    return sortDirection === "asc" ? comparison : -comparison;
+  });
+}
+
 function render() {
   tbody.innerHTML = "";
 
@@ -110,7 +145,10 @@ function render() {
         return hay.includes(query.toLowerCase());
       });
 
-  if (!filtered.length) {
+  // Sort the filtered list
+  const sorted = sortEntries(filtered);
+
+  if (!sorted.length) {
     emptyState.classList.remove("hidden");
     emptyState.textContent = query
       ? "No matches. Try a different search."
@@ -119,7 +157,7 @@ function render() {
     emptyState.classList.add("hidden");
   }
 
-  for (const e of filtered) {
+  for (const e of sorted) {
     const tr = document.createElement("tr");
     tr.dataset.id = e.id;
 
@@ -127,14 +165,14 @@ function render() {
 
     tr.innerHTML = `
       <td class="col-date" data-field="date">${escapeHtml(
-        formatDisplayDate(e.date)
+        formatDisplayDate(e.date),
       )}</td>
       <td data-field="maintenance">${escapeHtml(e.maintenance)}</td>
       <td class="col-mileage" data-field="mileage">${escapeHtml(
-        formatMileage(e.mileage)
+        formatMileage(e.mileage),
       )}</td>
       <td class="col-cost" data-field="cost">${escapeHtml(
-        formatMoney(e.cost)
+        formatMoney(e.cost),
       )}</td>
       <td class="col-actions">
         <div class="actions">
@@ -238,18 +276,18 @@ function startInlineEdit(tr, entry) {
 
   // Replace cells with inputs (date stays ISO for <input type="date">)
   dateTd.innerHTML = `<input class="cell-input" type="date" value="${escapeHtml(
-    entry.date
+    entry.date,
   )}" />`;
   maintTd.innerHTML = `<input class="cell-input" type="text" value="${escapeHtml(
-    entry.maintenance
+    entry.maintenance,
   )}" />`;
   mileageTd.innerHTML = `<input class="cell-input" type="number" step="1" min="0" value="${escapeHtml(
-    entry.mileage ?? ""
+    entry.mileage ?? "",
   )}" style="text-align:right" />`;
   costTd.innerHTML = `<input class="cell-input" type="text" value="${escapeHtml(
     sanitizeMoney(entry.cost) !== null
       ? sanitizeMoney(entry.cost).toFixed(2)
-      : "0.00"
+      : "0.00",
   )}" />`;
 
   actionsTd.innerHTML = `
@@ -357,7 +395,7 @@ tbody.addEventListener("click", async (e) => {
       .querySelector('td[data-field="maintenance"] input')
       ?.value?.trim();
     const mileageVal = tr.querySelector(
-      'td[data-field="mileage"] input'
+      'td[data-field="mileage"] input',
     )?.value;
     const costVal = tr.querySelector('td[data-field="cost"] input')?.value;
 
@@ -387,6 +425,35 @@ tbody.addEventListener("click", async (e) => {
 // ---- PDF download ----
 downloadPdfBtn.addEventListener("click", () => {
   window.location.href = "/api/entries.pdf";
+});
+
+// ---- Column sorting ----
+document.querySelector(".table thead").addEventListener("click", (e) => {
+  const th = e.target.closest("th");
+  if (!th) return;
+
+  // Get the column index to determine which field to sort
+  const columnIndex = Array.from(th.parentElement.children).indexOf(th);
+  const columnMap = ["date", null, "mileage", "cost"]; // null = not sortable
+  const column = columnMap[columnIndex];
+
+  if (!column) return; // Maintenance and Actions columns have no sort
+
+  // Toggle sort direction if clicking same column, otherwise reset to asc
+  if (sortColumn === column) {
+    sortDirection = sortDirection === "asc" ? "desc" : "asc";
+  } else {
+    sortColumn = column;
+    sortDirection = "asc";
+  }
+
+  // Update header indicators
+  document.querySelectorAll(".table thead th").forEach((header) => {
+    header.classList.remove("sort-asc", "sort-desc");
+  });
+  th.classList.add(`sort-${sortDirection}`);
+
+  render();
 });
 
 // ---- Default date to today ----

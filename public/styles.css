@@ -9,8 +9,6 @@
 
   /* KRT-ish accents */
   --krt-green: #43ff6b;
-  --krt-red: #ff365a;
-  --krt-black: #0b0e12;
 
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   --radius: 14px;
@@ -136,6 +134,54 @@ h1 {
   padding: 10px 12px;
   background: rgba(20, 25, 34, 0.9);
   border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: background 120ms ease;
+}
+
+.table thead th:hover {
+  background: rgba(30, 35, 44, 0.9);
+  color: var(--text);
+}
+
+/* Disable sorting on maintenance and actions columns */
+.table thead th:nth-child(2),
+.table thead th:nth-child(5) {
+  cursor: default;
+}
+
+.table thead th:nth-child(2):hover,
+.table thead th:nth-child(5):hover {
+  background: rgba(20, 25, 34, 0.9);
+  color: var(--muted);
+}
+
+/* Sort indicators - add padding to prevent overlap */
+.table thead th.sort-asc,
+.table thead th.sort-desc {
+  padding-right: 24px; /* Extra space for arrow */
+}
+
+.table thead th.sort-asc::after,
+.table thead th.sort-desc::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+.table thead th.sort-asc::after {
+  border-bottom: 5px solid var(--krt-green);
+}
+
+.table thead th.sort-desc::after {
+  border-top: 5px solid var(--krt-green);
 }
 
 .table tbody td {
