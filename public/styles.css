@@ -125,9 +125,9 @@ h1 {
 }
 
 .table th:nth-child(1), .table td:nth-child(1) { width: 140px; }
-.table th:nth-child(3), .table td:nth-child(3) { width: 140px; text-align: right; }
-.table th:nth-child(4), .table td:nth-child(4) { width: 120px; text-align: right; }
-.table th:nth-child(5), .table td:nth-child(5) { width: 120px; }
+.table th:nth-child(3), .table td:nth-child(3) { width: 130px; text-align: right; }
+.table th:nth-child(4), .table td:nth-child(4) { width: 110px; text-align: right; }
+.table th:nth-child(5), .table td:nth-child(5) { width: 160px; }
 
 .table thead th {
   text-align: left;
@@ -161,6 +161,11 @@ h1 {
   transition: opacity 120ms ease;
 }
 
+/* Force actions to always be visible in edit mode */
+tr.editing .actions {
+  opacity: 1;
+}
+
 .search {
   width: 280px;
   background: rgba(16, 21, 29, 0.7);
@@ -189,6 +194,7 @@ tr:hover .actions { opacity: 1; }
   gap: 8px;
   align-items: center;
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .icon-btn:hover {
@@ -275,6 +281,20 @@ input {
 input:focus {
   border-color: rgba(67, 255, 107, 0.45);
   box-shadow: 0 0 0 3px rgba(67, 255, 107, 0.12);
+}
+
+/* Special styling for inline cell inputs */
+.cell-input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+/* Right-align numeric inputs in edit mode */
+td[data-field="mileage"] .cell-input,
+td[data-field="cost"] .cell-input {
+  text-align: right;
 }
 
 .hint {

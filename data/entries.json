@@ -47,7 +47,15 @@
   {
     "id": "mkcz41lqsd64hk",
     "date": "2025-07-07",
-    "maintenance": "KNV install rear sets",
-    "cost": 235.15
+    "maintenance": "KNV - install rear sets",
+    "cost": 235.15,
+    "mileage": null
+  },
+  {
+    "id": "mkvpl2xg66x046",
+    "date": "2026-01-26",
+    "maintenance": "KNV - rear hugger removal",
+    "mileage": null,
+    "cost": 140
   }
 ]

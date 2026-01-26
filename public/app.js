@@ -250,7 +250,7 @@ function startInlineEdit(tr, entry) {
     sanitizeMoney(entry.cost) !== null
       ? sanitizeMoney(entry.cost).toFixed(2)
       : "0.00"
-  )}" style="text-align:right" />`;
+  )}" />`;
 
   actionsTd.innerHTML = `
     <button class="icon-btn" data-action="save" type="button" title="Save">✅ <span>Save</span></button>
