@@ -1,6 +1,6 @@
-# 2024 ZX10R (KRT) Maintenance / Mods Tracker
+# 2024 ZX10R (KRT) ABS Maintenance / Mods Tracker
 
-Local web app to track maintenance + mods + expenses for my 2024 ZX10R KRT edition.
+Local web app to track maintenance + mods + expenses for my 2024 ZX10R KRT ABS edition.
 
 ## Features
 - Dark mode 
@@ -8,7 +8,7 @@ Local web app to track maintenance + mods + expenses for my 2024 ZX10R KRT editi
 - Auto-sorts chronologically (oldest → newest)
 - Edit and delete rows (buttons appear on hover)
 - Download table as PDF
-- Data stored in `data/entries.json` (easy to edit manually if you want)
+- Data stored in `data/entries.json`
 
 ## Requirements
 - Node.js 18+ recommended
@@ -16,3 +16,4 @@ Local web app to track maintenance + mods + expenses for my 2024 ZX10R KRT editi
 ## Setup
 ```bash
 npm install
+node server.js
