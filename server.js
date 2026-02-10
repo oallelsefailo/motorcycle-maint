@@ -16,20 +16,33 @@ app.use(express.static(path.join(__dirname, "public")));
 function ensureDataFile() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify([], null, 2), "utf-8");
+    fs.writeFileSync(
+      DATA_FILE,
+      JSON.stringify({ entries: [], notes: "" }, null, 2),
+      "utf-8",
+    );
   }
 }
 
-function readEntries() {
+function readData() {
   ensureDataFile();
   const raw = fs.readFileSync(DATA_FILE, "utf-8");
   const parsed = JSON.parse(raw);
-  return Array.isArray(parsed) ? parsed : [];
+
+  // Handle legacy format (array) or new format (object with entries + notes)
+  if (Array.isArray(parsed)) {
+    return { entries: parsed, notes: "" };
+  }
+
+  return {
+    entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+    notes: typeof parsed.notes === "string" ? parsed.notes : "",
+  };
 }
 
-function writeEntries(entries) {
+function writeData(data) {
   ensureDataFile();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(entries, null, 2), "utf-8");
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
 function makeId() {
@@ -75,8 +88,16 @@ function sortChronological(entries) {
 }
 
 // ---------- API ----------
+app.get("/api/data", (req, res) => {
+  const data = readData();
+  data.entries = sortChronological(data.entries);
+  res.json(data);
+});
+
+// Legacy endpoint for backwards compatibility
 app.get("/api/entries", (req, res) => {
-  res.json(sortChronological(readEntries()));
+  const data = readData();
+  res.json(sortChronological(data.entries));
 });
 
 app.post("/api/entries", (req, res) => {
@@ -109,7 +130,7 @@ app.post("/api/entries", (req, res) => {
     return res.status(400).json({ error: "Cost must be a number." });
   }
 
-  const entries = readEntries();
+  const data = readData();
   const newEntry = {
     id: makeId(),
     date,
@@ -122,10 +143,11 @@ app.post("/api/entries", (req, res) => {
     newEntry.mileage = mileageVal;
   }
 
-  entries.push(newEntry);
-  writeEntries(entries);
+  data.entries.push(newEntry);
+  writeData(data);
 
-  res.status(201).json(sortChronological(entries));
+  data.entries = sortChronological(data.entries);
+  res.status(201).json(data);
 });
 
 app.put("/api/entries/:id", (req, res) => {
@@ -157,12 +179,12 @@ app.put("/api/entries/:id", (req, res) => {
     return res.status(400).json({ error: "Cost must be a number." });
   }
 
-  const entries = readEntries();
-  const idx = entries.findIndex((e) => e.id === id);
+  const data = readData();
+  const idx = data.entries.findIndex((e) => e.id === id);
   if (idx === -1) return res.status(404).json({ error: "Entry not found." });
 
   const updatedEntry = {
-    ...entries[idx],
+    ...data.entries[idx],
     date,
     maintenance: maintenance.trim(),
     cost: costVal,
@@ -175,28 +197,47 @@ app.put("/api/entries/:id", (req, res) => {
     delete updatedEntry.mileage;
   }
 
-  entries[idx] = updatedEntry;
+  data.entries[idx] = updatedEntry;
 
-  writeEntries(entries);
-  res.json(sortChronological(entries));
+  writeData(data);
+  data.entries = sortChronological(data.entries);
+  res.json(data);
 });
 
 app.delete("/api/entries/:id", (req, res) => {
   const { id } = req.params;
-  const entries = readEntries();
-  const next = entries.filter((e) => e.id !== id);
+  const data = readData();
+  const next = data.entries.filter((e) => e.id !== id);
 
-  if (next.length === entries.length) {
+  if (next.length === data.entries.length) {
     return res.status(404).json({ error: "Entry not found." });
   }
 
-  writeEntries(next);
-  res.json(sortChronological(next));
+  data.entries = next;
+  writeData(data);
+  data.entries = sortChronological(data.entries);
+  res.json(data);
+});
+
+app.put("/api/notes", (req, res) => {
+  const { notes } = req.body || {};
+
+  if (typeof notes !== "string") {
+    return res.status(400).json({ error: "Notes must be a string." });
+  }
+
+  const data = readData();
+  data.notes = notes;
+  writeData(data);
+
+  res.json({ success: true });
 });
 
 // ---------- PDF download ----------
 app.get("/api/entries.pdf", (req, res) => {
-  const entries = sortChronological(readEntries());
+  const data = readData();
+  const entries = sortChronological(data.entries);
+  const notes = data.notes || "";
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
@@ -358,11 +399,56 @@ app.get("/api/entries.pdf", (req, res) => {
     drawRow(e, false);
   }
 
+  // Total - right aligned
   doc.moveDown(1);
+  const totalText = `Total Spent: $${total.toFixed(2)}`;
+  const totalWidth = doc.widthOfString(totalText);
   doc
     .font("Helvetica-Bold")
     .fontSize(12)
-    .text(`Total Spent: $${total.toFixed(2)}`);
+    .text(
+      totalText,
+      doc.page.width - doc.page.margins.right - totalWidth - 10,
+      doc.y,
+    );
+
+  // Add notes section if there are any notes
+  if (notes.trim()) {
+    doc.moveDown(3);
+
+    // Check if we need a new page
+    if (doc.y > doc.page.height - doc.page.margins.bottom - 100) {
+      doc.addPage();
+    }
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(12)
+      .fillColor("black")
+      .text("Additional Mods:", startX);
+
+    doc.moveDown(0.5);
+
+    // Split notes by newlines and display as bulleted list
+    const noteLines = notes
+      .trim()
+      .split("\n")
+      .filter((line) => line.trim());
+    doc.font("Helvetica").fontSize(10).fillColor("#333");
+
+    for (const line of noteLines) {
+      if (line.trim()) {
+        // Check for page break
+        if (doc.y > doc.page.height - doc.page.margins.bottom - 20) {
+          doc.addPage();
+        }
+        doc.text(`• ${line.trim()}`, startX, doc.y, {
+          width: pageWidth,
+          lineGap: 3,
+        });
+      }
+    }
+  }
 
   doc.end();
 });

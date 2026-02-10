@@ -9,7 +9,6 @@
     <title>ZX10R Maintenance Tracker</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-
   <body>
     <div class="app">
       <header class="header">
@@ -24,7 +23,6 @@
             <p class="subtitle">Maintenance + Mods + Expenses</p>
           </div>
         </div>
-
         <div class="header-actions">
           <input
             id="searchInput"
@@ -32,13 +30,11 @@
             type="text"
             placeholder="Search… (e.g. oil, chain, levers)"
           />
-
           <button id="downloadPdfBtn" class="btn btn-ghost" type="button">
             Download PDF
           </button>
         </div>
       </header>
-
       <section class="summary">
         <div class="card">
           <div class="card-label">Total spent</div>
@@ -53,7 +49,6 @@
           <div id="oilAvg" class="card-value">—</div>
         </div>
       </section>
-
       <section class="table-wrap">
         <table class="table" aria-label="Maintenance table">
           <thead>
@@ -69,19 +64,16 @@
             <!-- rows injected -->
           </tbody>
         </table>
-
         <div id="emptyState" class="empty-state hidden">
           No entries yet. Add your first oil change / mod below.
         </div>
       </section>
-
       <footer class="footer">
         <form id="addForm" class="add-form" autocomplete="off">
           <div class="field">
             <label for="dateInput">Date</label>
             <input id="dateInput" type="date" required />
           </div>
-
           <div class="field grow">
             <label for="maintInput">Maintenance / Mod</label>
             <input
@@ -92,7 +84,6 @@
               autofocus
             />
           </div>
-
           <div class="field">
             <label for="mileageInput">Mileage (optional)</label>
             <input
@@ -103,7 +94,6 @@
               placeholder="e.g. 4000"
             />
           </div>
-
           <div class="field">
             <label for="costInput">Cost</label>
             <input
@@ -114,16 +104,23 @@
               required
             />
           </div>
-
           <button class="btn btn-primary" type="submit">Add</button>
         </form>
-
         <div class="hint">
           Hit <span class="kbd">Enter</span> to add. Hover a row to edit or delete.
         </div>
+        <div class="notes-section">
+          <label for="notesInput">Additional notes (pre-installed mods, unknown dates/costs, etc.)</label>
+          <textarea
+            id="notesInput"
+            class="notes-textarea"
+            placeholder="e.g. exhaust (installed before purchase)&#10;Frame sliders&#10;Custom seat cowl"
+            rows="4"
+          ></textarea>
+          <div class="notes-hint">Auto-saved. Will appear at the bottom of PDF exports.</div>
+        </div>
       </footer>
     </div>
-
     <script src="./app.js"></script>
   </body>
 </html>

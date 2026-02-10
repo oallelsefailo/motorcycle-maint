@@ -12,12 +12,14 @@ const costInput = document.getElementById("costInput");
 
 const searchInput = document.getElementById("searchInput");
 const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+const notesInput = document.getElementById("notesInput");
 
 let entries = [];
 let query = "";
 let deleteConfirmId = null;
 let sortColumn = "date"; // default sort by date
 let sortDirection = "asc"; // asc or desc
+let notes = ""; // additional notes text
 
 function escapeHtml(str) {
   return String(str)
@@ -206,8 +208,11 @@ function render() {
 }
 
 async function refresh() {
-  const res = await fetch("/api/entries");
-  entries = await res.json();
+  const res = await fetch("/api/data");
+  const data = await res.json();
+  entries = data.entries || [];
+  notes = data.notes || "";
+  notesInput.value = notes;
   render();
 }
 
@@ -224,7 +229,9 @@ async function addEntry({ date, maintenance, mileage, cost }) {
     return;
   }
 
-  entries = await res.json();
+  const data = await res.json();
+  entries = data.entries || [];
+  notes = data.notes || "";
   render();
 }
 
@@ -241,7 +248,9 @@ async function updateEntry(id, { date, maintenance, mileage, cost }) {
     return false;
   }
 
-  entries = await res.json();
+  const data = await res.json();
+  entries = data.entries || [];
+  notes = data.notes || "";
   render();
   return true;
 }
@@ -257,7 +266,9 @@ async function deleteEntry(id) {
     return;
   }
 
-  entries = await res.json();
+  const data = await res.json();
+  entries = data.entries || [];
+  notes = data.notes || "";
   render();
 }
 
@@ -345,6 +356,26 @@ costInput.addEventListener("blur", () => {
 searchInput.addEventListener("input", (e) => {
   query = e.target.value || "";
   render();
+});
+
+// ---- Notes auto-save ----
+let notesTimeout;
+notesInput.addEventListener("input", (e) => {
+  notes = e.target.value;
+
+  // Debounce: save 500ms after user stops typing
+  clearTimeout(notesTimeout);
+  notesTimeout = setTimeout(async () => {
+    try {
+      await fetch("/api/notes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      });
+    } catch (err) {
+      console.error("Failed to save notes:", err);
+    }
+  }, 500);
 });
 
 // ---- Row actions ----
