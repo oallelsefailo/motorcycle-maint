@@ -29,7 +29,6 @@ function readData() {
   const raw = fs.readFileSync(DATA_FILE, "utf-8");
   const parsed = JSON.parse(raw);
 
-  // Handle legacy format (array) or new format (object with entries + notes)
   if (Array.isArray(parsed)) {
     return { entries: parsed, notes: "" };
   }
@@ -50,7 +49,6 @@ function makeId() {
 }
 
 function isValidISODate(dateStr) {
-  // Expecting YYYY-MM-DD from <input type="date">
   return typeof dateStr === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
 }
 
@@ -62,14 +60,12 @@ function formatPdfDate(isoDate) {
 }
 
 function normalizeCost(value) {
-  // accept "$220", "220", 220, "220.00"
   const num = Number(String(value).replace(/[^0-9.-]/g, ""));
   if (!Number.isFinite(num)) return null;
   return Math.round(num * 100) / 100;
 }
 
 function normalizeMileage(value) {
-  // blank => null (optional field)
   if (value === "" || value === null || value === undefined) return null;
   const num = Number(String(value).replace(/[^0-9.-]/g, ""));
   if (!Number.isFinite(num) || num < 0) return null;
@@ -77,7 +73,6 @@ function normalizeMileage(value) {
 }
 
 function sortChronological(entries) {
-  // Oldest -> newest, by date
   return entries.slice().sort((a, b) => {
     const ad = a.date || "";
     const bd = b.date || "";
@@ -94,7 +89,6 @@ app.get("/api/data", (req, res) => {
   res.json(data);
 });
 
-// Legacy endpoint for backwards compatibility
 app.get("/api/entries", (req, res) => {
   const data = readData();
   res.json(sortChronological(data.entries));
@@ -112,8 +106,6 @@ app.post("/api/entries", (req, res) => {
   }
 
   const mileageVal = normalizeMileage(mileage);
-  // mileage is optional, but if they typed something invalid normalizeMileage => null
-  // if they typed invalid non-blank, we should reject:
   if (
     mileage !== "" &&
     mileage !== null &&
@@ -138,7 +130,6 @@ app.post("/api/entries", (req, res) => {
     cost: costVal,
   };
 
-  // Only add mileage if it has a value
   if (mileageVal !== null) {
     newEntry.mileage = mileageVal;
   }
@@ -190,7 +181,6 @@ app.put("/api/entries/:id", (req, res) => {
     cost: costVal,
   };
 
-  // Only add mileage if it has a value, otherwise remove it
   if (mileageVal !== null) {
     updatedEntry.mileage = mileageVal;
   } else {
@@ -263,11 +253,9 @@ app.get("/api/entries.pdf", (req, res) => {
       height: logoHeight,
     });
 
-    // title starts to the right of the logo
     titleStartX = headerLeft + logoWidth + 12;
   }
 
-  // Move cursor to top for title
   doc.y = headerTop;
 
   doc
@@ -283,7 +271,6 @@ app.get("/api/entries.pdf", (req, res) => {
       },
     );
 
-  // Subtitle / generated time
   doc
     .moveDown(0.4)
     .fontSize(10)
@@ -293,10 +280,8 @@ app.get("/api/entries.pdf", (req, res) => {
 
   doc.fillColor("black");
 
-  // Push content below header block
   doc.y = headerTop + logoHeight + 18;
 
-  // Table layout
   const pageWidth =
     doc.page.width - doc.page.margins.left - doc.page.margins.right;
   const colDate = 110;
@@ -311,7 +296,6 @@ app.get("/api/entries.pdf", (req, res) => {
     const rowPadY = 6;
     const rowHeight = isHeader ? 18 : 20;
 
-    // page break
     if (y + rowHeight + 10 > doc.page.height - doc.page.margins.bottom) {
       doc.addPage();
       y = doc.page.margins.top;
@@ -334,7 +318,6 @@ app.get("/api/entries.pdf", (req, res) => {
       doc.fillColor("black").fontSize(10).font("Helvetica");
     }
 
-    // Date
     doc.text(
       String(isHeader ? date : formatPdfDate(date)),
       startX + 6,
@@ -344,13 +327,11 @@ app.get("/api/entries.pdf", (req, res) => {
       },
     );
 
-    // Maintenance
     doc.text(String(maintenance), startX + colDate + 6, y + rowPadY, {
       width: colMaint - 12,
       ellipsis: true,
     });
 
-    // Mileage
     const mileText = isHeader
       ? String(mileage)
       : Number.isFinite(Number(mileage))
@@ -361,7 +342,6 @@ app.get("/api/entries.pdf", (req, res) => {
       align: "right",
     });
 
-    // Cost
     const costX = startX + colDate + colMaint + colMileage + 6;
     if (isHeader) {
       doc.text(String(cost), costX, y + rowPadY, {
@@ -380,7 +360,6 @@ app.get("/api/entries.pdf", (req, res) => {
     y += rowHeight;
   }
 
-  // Header row
   drawRow(
     {
       date: "Date",
@@ -391,7 +370,6 @@ app.get("/api/entries.pdf", (req, res) => {
     true,
   );
 
-  // Data rows + total
   let total = 0;
   for (const e of entries) {
     const c = normalizeCost(e.cost);
@@ -399,24 +377,20 @@ app.get("/api/entries.pdf", (req, res) => {
     drawRow(e, false);
   }
 
-  // Total - right aligned
   doc.moveDown(1);
-  const totalText = `Total Spent: $${total.toFixed(2)}`;
-  const totalWidth = doc.widthOfString(totalText);
+  const rightEdge = startX + pageWidth;
   doc
     .font("Helvetica-Bold")
     .fontSize(12)
-    .text(
-      totalText,
-      doc.page.width - doc.page.margins.right - totalWidth - 10,
-      doc.y,
-    );
+    .text(`Total Spent: $${total.toFixed(2)}`, startX, doc.y, {
+      width: pageWidth,
+      align: "right",
+      lineBreak: false,
+    });
 
-  // Add notes section if there are any notes
   if (notes.trim()) {
     doc.moveDown(3);
 
-    // Check if we need a new page
     if (doc.y > doc.page.height - doc.page.margins.bottom - 100) {
       doc.addPage();
     }
@@ -429,7 +403,6 @@ app.get("/api/entries.pdf", (req, res) => {
 
     doc.moveDown(0.5);
 
-    // Split notes by newlines and display as bulleted list
     const noteLines = notes
       .trim()
       .split("\n")
@@ -438,7 +411,6 @@ app.get("/api/entries.pdf", (req, res) => {
 
     for (const line of noteLines) {
       if (line.trim()) {
-        // Check for page break
         if (doc.y > doc.page.height - doc.page.margins.bottom - 20) {
           doc.addPage();
         }
@@ -453,7 +425,6 @@ app.get("/api/entries.pdf", (req, res) => {
   doc.end();
 });
 
-// fallback route
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
