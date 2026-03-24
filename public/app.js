@@ -13,6 +13,9 @@ const costInput = document.getElementById("costInput");
 const searchInput = document.getElementById("searchInput");
 const downloadPdfBtn = document.getElementById("downloadPdfBtn");
 const notesInput = document.getElementById("notesInput");
+const torqueSpecsBtn = document.getElementById("torqueSpecsBtn");
+const torqueModal = document.getElementById("torqueModal");
+const closeModal = document.getElementById("closeModal");
 
 let entries = [];
 let query = "";
@@ -456,6 +459,36 @@ tbody.addEventListener("click", async (e) => {
 // ---- PDF download ----
 downloadPdfBtn.addEventListener("click", () => {
   window.location.href = "/api/entries.pdf";
+});
+
+// ---- Torque Specs Modal ----
+torqueSpecsBtn.addEventListener("click", () => {
+  torqueModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden"; // Prevent background scrolling
+});
+
+closeModal.addEventListener("click", () => {
+  torqueModal.classList.add("hidden");
+  document.body.style.overflow = ""; // Restore scrolling
+});
+
+// Close modal when clicking overlay
+torqueModal.addEventListener("click", (e) => {
+  if (
+    e.target === torqueModal ||
+    e.target.classList.contains("modal-overlay")
+  ) {
+    torqueModal.classList.add("hidden");
+    document.body.style.overflow = "";
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !torqueModal.classList.contains("hidden")) {
+    torqueModal.classList.add("hidden");
+    document.body.style.overflow = "";
+  }
 });
 
 // ---- Column sorting ----

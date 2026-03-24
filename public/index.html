@@ -30,6 +30,9 @@
             type="text"
             placeholder="Search… (e.g. oil, chain, levers)"
           />
+          <button id="torqueSpecsBtn" class="btn btn-ghost" type="button">
+            Torque Specs
+          </button>
           <button id="downloadPdfBtn" class="btn btn-ghost" type="button">
             Download PDF
           </button>
@@ -114,13 +117,166 @@
           <textarea
             id="notesInput"
             class="notes-textarea"
-            placeholder="e.g. exhaust (installed before purchase)&#10;Frame sliders&#10;Custom seat cowl"
+            placeholder="e.g. Yoshimura exhaust (installed before purchase)&#10;Frame sliders&#10;Custom seat cowl"
             rows="4"
           ></textarea>
           <div class="notes-hint">Auto-saved. Will appear at the bottom of PDF exports.</div>
         </div>
       </footer>
     </div>
+
+    <!-- Torque Specs Modal -->
+    <div id="torqueModal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>ZX-10R (Gen 6) — Torque + Bolt + Tool Reference</h2>
+          <button id="closeModal" class="modal-close" type="button">✕</button>
+        </div>
+        <div class="modal-body">
+          <section class="torque-section">
+            <h3>Body</h3>
+            <div class="torque-item">
+              <strong>Upper fairings</strong>
+              <ul>
+                <li>M5 × 15mm — 0.8 pitch</li>
+                <li>8mm socket</li>
+                <li>Torque: ~3–5 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Windscreen bolts</strong>
+              <ul>
+                <li>M5 × 12–15mm — 0.8 pitch</li>
+                <li>8mm socket</li>
+                <li>Torque: ~3–5 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Mirror mounting bolts</strong>
+              <ul>
+                <li>M6 × 22mm — 1.00 pitch</li>
+                <li>10mm socket</li>
+                <li>Torque: ~7–9 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Front fender</strong>
+              <ul>
+                <li>M6 × 14–15mm — 1.00 pitch</li>
+                <li>10mm socket</li>
+                <li>Torque: ~7–9 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Bar end weights</strong>
+              <ul>
+                <li>M8 × 30mm — 1.25 pitch</li>
+                <li>12mm socket</li>
+                <li>Torque: ~15–20 ft-lb</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="torque-section">
+            <h3>Brakes</h3>
+            <div class="torque-item">
+              <strong>Front brake caliper bolts</strong>
+              <ul>
+                <li>M10 × 73mm — 1.5 pitch</li>
+                <li>17mm socket</li>
+                <li>Torque: ~26–30 ft-lb</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="torque-section">
+            <h3>Driveline</h3>
+            <div class="torque-item">
+              <strong>Rear sprocket nuts</strong>
+              <ul>
+                <li>M10 — 1.25 pitch</li>
+                <li>17mm socket</li>
+                <li>Torque: ~44 ft-lb</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="torque-section">
+            <h3>Wheels & Suspension</h3>
+            <div class="torque-item">
+              <strong>Rear axle nut</strong>
+              <ul>
+                <li>M24 × 1.5</li>
+                <li>32mm socket</li>
+                <li>Torque: 95.9 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Front axle nut</strong>
+              <ul>
+                <li>22mm or 24mm hex (verify fitment)</li>
+                <li>Torque: ~94–96 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Front axle pinch bolts</strong>
+              <ul>
+                <li>M8 × 35mm — 1.25 pitch</li>
+                <li>8mm Allen (12mm socket equivalent)</li>
+                <li>Torque: ~15–20 ft-lb</li>
+                <li><em>Note: tighten alternately</em></li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Front brake caliper bolts (shared for quick access)</strong>
+              <ul>
+                <li>M10 × 73mm — 1.5 pitch</li>
+                <li>17mm socket</li>
+                <li>Torque: ~26–30 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Upper triple crown pinch bolts</strong>
+              <ul>
+                <li>M8 × 25mm — 1.25 pitch</li>
+                <li>12mm socket</li>
+                <li>Torque: ~15–20 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Lower triple clamp pinch bolts</strong>
+              <ul>
+                <li>M8 × 40mm — 1.25 pitch</li>
+                <li>12mm socket</li>
+                <li>Torque: ~15–20 ft-lb</li>
+              </ul>
+            </div>
+            <div class="torque-item">
+              <strong>Öhlins steering damper mounts</strong>
+              <ul>
+                <li>M8 × 25mm — 1.25 pitch</li>
+                <li>12mm socket</li>
+                <li>Torque: 97 lb-in (~8 ft-lb)</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="torque-section quick-ref">
+            <h3>Quick Reference</h3>
+            <ul class="quick-ref-list">
+              <li>M5 → 8mm → ~3–5 ft-lb</li>
+              <li>M6 → 10mm → ~7–9 ft-lb</li>
+              <li>M8 → 12mm / 8mm Allen → ~15–20 ft-lb</li>
+              <li>M10 → 17mm → ~26–44 ft-lb</li>
+              <li>Front Axle → 22–24mm hex → ~94–96 ft-lb</li>
+              <li>Rear Axle → 32mm → 95.9 ft-lb</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
+
     <script src="./app.js"></script>
   </body>
 </html>
