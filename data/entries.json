@@ -81,6 +81,13 @@
       "date": "2026-09-21",
       "maintenance": "AntiGravity Battery",
       "cost": 266
+    },
+    {
+      "id": "mw0uuzjp1b5b5n",
+      "date": "2026-11-03",
+      "maintenance": "oil change",
+      "cost": 65,
+      "mileage": 8554
     }
   ],
   "notes": "Racefit Growler-X exhaust\nMoore Mafia ECU flash\nZeroGravity smoke windscreen\nPuig winglets\nTST frame sliders\n16/43 Sprocket"
