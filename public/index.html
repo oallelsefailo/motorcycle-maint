@@ -71,6 +71,23 @@
           No entries yet. Add your first oil change / mod below.
         </div>
       </section>
+      <section id="oilSection" class="oil-section" aria-label="Oil analysis reports">
+        <div class="oil-header">
+          <div>
+            <h2 class="oil-title">Oil Analysis</h2>
+            <div class="oil-sub">Blackstone Labs reports · drop a PDF here or upload</div>
+          </div>
+          <label class="btn btn-ghost oil-upload-btn">
+            Upload PDF
+            <input id="oilFileInput" type="file" accept=".pdf,application/pdf" hidden />
+          </label>
+        </div>
+        <ul id="oilList" class="oil-list"></ul>
+        <div id="oilEmpty" class="oil-empty hidden">
+          No oil reports yet. Drag a PDF here or click Upload PDF.
+        </div>
+        <div id="oilDropHint" class="oil-drop-hint">Drop PDF to upload</div>
+      </section>
       <footer class="footer">
         <form id="addForm" class="add-form" autocomplete="off">
           <div class="field">

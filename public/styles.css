@@ -294,6 +294,137 @@ tr:hover .actions { opacity: 1; }
   background: transparent;
 }
 
+/* ---------- Oil Analysis ---------- */
+.oil-section {
+  position: relative;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(16, 21, 29, 0.78);
+  box-shadow: var(--shadow);
+  flex-shrink: 0;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.oil-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.oil-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.oil-sub {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.oil-upload-btn {
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.oil-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 132px; /* ~3 rows, then scroll */
+  overflow-y: auto;
+}
+
+.oil-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  transition: background 120ms ease;
+}
+
+.oil-row + .oil-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.oil-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.oil-icon {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--krt-green);
+  border: 1px solid rgba(67, 255, 107, 0.3);
+  background: rgba(67, 255, 107, 0.06);
+  border-radius: 6px;
+  padding: 3px 5px;
+}
+
+.oil-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oil-meta {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Reuse the table's hover-to-reveal actions */
+.oil-row:hover .actions,
+.oil-row.confirming .actions {
+  opacity: 1;
+}
+
+.oil-empty {
+  padding: 6px 2px 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.oil-drop-hint {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  background: rgba(16, 21, 29, 0.85);
+  color: var(--krt-green);
+  font-weight: 700;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.oil-section.dragover {
+  border-color: rgba(67, 255, 107, 0.45);
+  box-shadow: 0 0 0 3px rgba(67, 255, 107, 0.12), var(--shadow);
+}
+
+.oil-section.dragover .oil-drop-hint {
+  display: flex;
+}
+
+.oil-section.uploading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .footer {
   margin-top: 14px;
   margin-bottom: 0;

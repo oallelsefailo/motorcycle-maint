@@ -529,6 +529,181 @@ document.querySelector(".table thead").addEventListener("click", (e) => {
   dateInput.value = `${yyyy}-${mm}-${dd}`;
 })();
 
+// ---- Oil Analysis (PDFs in /files) ----
+const oilSection = document.getElementById("oilSection");
+const oilList = document.getElementById("oilList");
+const oilEmpty = document.getElementById("oilEmpty");
+const oilFileInput = document.getElementById("oilFileInput");
+
+let oilReports = [];
+let oilDeleteConfirm = null; // filename awaiting delete confirmation
+
+function formatFileSize(bytes) {
+  const n = Number(bytes) || 0;
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatFileDate(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${mm}/${dd}/${d.getFullYear()}`;
+}
+
+function oilReportUrl(filename) {
+  return `/api/oil-reports/${encodeURIComponent(filename)}`;
+}
+
+function renderOilReports() {
+  oilList.innerHTML = "";
+  oilEmpty.classList.toggle("hidden", oilReports.length > 0);
+
+  for (const r of oilReports) {
+    const li = document.createElement("li");
+    const confirming = oilDeleteConfirm === r.filename;
+    li.className = `oil-row${confirming ? " confirming" : ""}`;
+    li.dataset.filename = r.filename;
+
+    li.innerHTML = `
+      <span class="oil-icon" aria-hidden="true">PDF</span>
+      <span class="oil-name" title="${escapeHtml(r.filename)}">${escapeHtml(r.filename)}</span>
+      <span class="oil-meta">${escapeHtml(formatFileDate(r.modified))} · ${escapeHtml(formatFileSize(r.size))}</span>
+      <div class="actions">
+        ${
+          confirming
+            ? `
+              <button class="icon-btn danger" data-action="confirm-delete" type="button" title="Confirm delete">
+                ✅ <span>Confirm</span>
+              </button>
+              <button class="icon-btn" data-action="cancel-delete" type="button" title="Cancel">
+                ↩ <span>Cancel</span>
+              </button>
+            `
+            : `
+              <button class="icon-btn" data-action="view" type="button" title="Open in new tab">
+                👁 <span>View</span>
+              </button>
+              <button class="icon-btn danger" data-action="delete" type="button" title="Delete">
+                ✖ <span>Del</span>
+              </button>
+            `
+        }
+      </div>
+    `;
+    oilList.appendChild(li);
+  }
+}
+
+async function refreshOilReports() {
+  try {
+    const res = await fetch("/api/oil-reports");
+    if (!res.ok) throw new Error();
+    oilReports = await res.json();
+  } catch {
+    oilReports = [];
+  }
+  renderOilReports();
+}
+
+async function uploadOilReport(file) {
+  if (!file) return;
+  if (!/\.pdf$/i.test(file.name)) {
+    alert("Only PDF files can be uploaded.");
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    alert("File too large (max 10MB).");
+    return;
+  }
+
+  const form = new FormData();
+  form.append("file", file);
+
+  oilSection.classList.add("uploading");
+  try {
+    const res = await fetch("/api/oil-reports", { method: "POST", body: form });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || "Upload failed.");
+      return;
+    }
+    await refreshOilReports();
+  } finally {
+    oilSection.classList.remove("uploading");
+  }
+}
+
+async function deleteOilReport(filename) {
+  const res = await fetch(oilReportUrl(filename), { method: "DELETE" });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    alert(err.error || "Failed to delete report.");
+  }
+  await refreshOilReports();
+}
+
+oilList.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const li = btn.closest("li[data-filename]");
+  if (!li) return;
+  const filename = li.dataset.filename;
+
+  switch (btn.dataset.action) {
+    case "view":
+      window.open(oilReportUrl(filename), "_blank", "noopener");
+      break;
+    case "delete":
+      oilDeleteConfirm = filename;
+      renderOilReports();
+      break;
+    case "cancel-delete":
+      oilDeleteConfirm = null;
+      renderOilReports();
+      break;
+    case "confirm-delete":
+      oilDeleteConfirm = null;
+      await deleteOilReport(filename);
+      break;
+  }
+});
+
+oilFileInput.addEventListener("change", async () => {
+  const file = oilFileInput.files && oilFileInput.files[0];
+  oilFileInput.value = ""; // allow re-selecting the same file
+  await uploadOilReport(file);
+});
+
+// Drag & drop onto the whole Oil Analysis card
+let oilDragDepth = 0;
+oilSection.addEventListener("dragenter", (e) => {
+  if (!e.dataTransfer?.types?.includes("Files")) return;
+  e.preventDefault();
+  oilDragDepth++;
+  oilSection.classList.add("dragover");
+});
+oilSection.addEventListener("dragover", (e) => {
+  if (!e.dataTransfer?.types?.includes("Files")) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "copy";
+});
+oilSection.addEventListener("dragleave", () => {
+  oilDragDepth = Math.max(0, oilDragDepth - 1);
+  if (oilDragDepth === 0) oilSection.classList.remove("dragover");
+});
+oilSection.addEventListener("drop", async (e) => {
+  e.preventDefault();
+  oilDragDepth = 0;
+  oilSection.classList.remove("dragover");
+  const file = e.dataTransfer?.files?.[0];
+  await uploadOilReport(file);
+});
+
+refreshOilReports();
+
 refresh().catch(() => {
   alert("Failed to load entries. Is the server running?");
 });

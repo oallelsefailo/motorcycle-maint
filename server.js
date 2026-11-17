@@ -2,12 +2,18 @@ const path = require("path");
 const fs = require("fs");
 const express = require("express");
 const PDFDocument = require("pdfkit");
+const multer = require("multer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const DATA_DIR = path.join(__dirname, "data");
 const DATA_FILE = path.join(DATA_DIR, "entries.json");
+
+// Oil analysis PDFs live here; the folder itself is the source of truth.
+const FILES_DIR = path.join(__dirname, "files");
+const MAX_REPORT_BYTES = 10 * 1024 * 1024; // 10MB
+if (!fs.existsSync(FILES_DIR)) fs.mkdirSync(FILES_DIR, { recursive: true });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -221,6 +227,137 @@ app.put("/api/notes", (req, res) => {
   writeData(data);
 
   res.json({ success: true });
+});
+
+// ---------- Oil analysis reports (PDFs in /files) ----------
+const SAFE_PDF_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/i;
+
+// Resolve a client-supplied filename to a path inside FILES_DIR, or null.
+function resolveReportPath(name) {
+  if (typeof name !== "string" || !SAFE_PDF_NAME.test(name)) return null;
+  if (path.basename(name) !== name) return null;
+  const full = path.resolve(FILES_DIR, name);
+  if (path.dirname(full) !== path.resolve(FILES_DIR)) return null;
+  return full;
+}
+
+// Turn an uploaded name into a safe, unique filename in FILES_DIR.
+function makeSafeReportName(originalName) {
+  const base = path
+    .basename(String(originalName || ""))
+    .replace(/\.pdf$/i, "")
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/^[^A-Za-z0-9]+/, "")
+    .replace(/-+/g, "-")
+    .replace(/[-.]+$/, "")
+    .slice(0, 100);
+  const stem = base || `oil-report-${Date.now()}`;
+
+  let candidate = `${stem}.pdf`;
+  let n = 1;
+  while (fs.existsSync(path.join(FILES_DIR, candidate))) {
+    candidate = `${stem}-${n++}.pdf`;
+  }
+  return candidate;
+}
+
+const reportUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, FILES_DIR),
+    filename: (req, file, cb) => cb(null, makeSafeReportName(file.originalname)),
+  }),
+  limits: { fileSize: MAX_REPORT_BYTES, files: 1 },
+  fileFilter: (req, file, cb) => {
+    const isPdf = /\.pdf$/i.test(file.originalname || "");
+    if (!isPdf) return cb(new Error("Only .pdf files are allowed."));
+    cb(null, true);
+  },
+}).single("file");
+
+app.get("/api/oil-reports", (req, res) => {
+  try {
+    const reports = fs
+      .readdirSync(FILES_DIR, { withFileTypes: true })
+      .filter((d) => d.isFile() && SAFE_PDF_NAME.test(d.name))
+      .map((d) => {
+        const stat = fs.statSync(path.join(FILES_DIR, d.name));
+        return {
+          filename: d.name,
+          size: stat.size,
+          modified: stat.mtime.toISOString(),
+        };
+      })
+      .sort((a, b) => b.modified.localeCompare(a.modified)); // newest first
+    res.json(reports);
+  } catch (err) {
+    console.error("Failed to list oil reports:", err);
+    res.status(500).json({ error: "Failed to list oil reports." });
+  }
+});
+
+app.post("/api/oil-reports", (req, res) => {
+  reportUpload(req, res, (err) => {
+    if (err) {
+      const msg =
+        err.code === "LIMIT_FILE_SIZE"
+          ? "File too large (max 10MB)."
+          : err.message || "Upload failed.";
+      return res.status(400).json({ error: msg });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded." });
+    }
+
+    // Verify it's really a PDF (magic bytes), not just named .pdf
+    const fullPath = req.file.path;
+    try {
+      const fd = fs.openSync(fullPath, "r");
+      const head = Buffer.alloc(5);
+      fs.readSync(fd, head, 0, 5, 0);
+      fs.closeSync(fd);
+      if (head.toString("latin1") !== "%PDF-") {
+        fs.unlinkSync(fullPath);
+        return res.status(400).json({ error: "File is not a valid PDF." });
+      }
+    } catch (e) {
+      fs.rmSync(fullPath, { force: true });
+      return res.status(500).json({ error: "Failed to save file." });
+    }
+
+    const stat = fs.statSync(fullPath);
+    res.status(201).json({
+      filename: req.file.filename,
+      size: stat.size,
+      modified: stat.mtime.toISOString(),
+    });
+  });
+});
+
+app.get("/api/oil-reports/:filename", (req, res) => {
+  const full = resolveReportPath(req.params.filename);
+  if (!full || !fs.existsSync(full)) {
+    return res.status(404).json({ error: "Report not found." });
+  }
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `inline; filename="${path.basename(full)}"`,
+  );
+  res.sendFile(full);
+});
+
+app.delete("/api/oil-reports/:filename", (req, res) => {
+  const full = resolveReportPath(req.params.filename);
+  if (!full || !fs.existsSync(full)) {
+    return res.status(404).json({ error: "Report not found." });
+  }
+  try {
+    fs.unlinkSync(full);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Failed to delete oil report:", err);
+    res.status(500).json({ error: "Failed to delete report." });
+  }
 });
 
 // ---------- PDF download ----------
