@@ -21,7 +21,7 @@ let entries = [];
 let query = "";
 let deleteConfirmId = null;
 let sortColumn = "date"; // default sort by date
-let sortDirection = "asc"; // asc or desc
+let sortDirection = "desc"; // asc or desc (default: newest first)
 let notes = ""; // additional notes text
 
 function escapeHtml(str) {
